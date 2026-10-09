@@ -3,6 +3,31 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+<!-- Shadow Sync: browser-level pointer-lock safety net.
+     Even if the Godot runtime fails to release pointer lock (tab close,
+     game over, focus loss), these page-level listeners force-exit it so the
+     user's mouse cursor is never left invisible in the browser. -->
+<script>
+(function () {
+	function forceExitPointerLock() {
+		try {
+			if (document.pointerLockElement) {
+				document.exitPointerLock();
+			}
+		} catch (e) { /* never break page teardown */ }
+	}
+	// Tab/window close or navigation away
+	window.addEventListener('pagehide', forceExitPointerLock);
+	window.addEventListener('beforeunload', forceExitPointerLock);
+	// Tab hidden (Alt+Tab away, minimize, switch tab)
+	document.addEventListener('visibilitychange', function () {
+		if (document.visibilityState === 'hidden') {
+			forceExitPointerLock();
+		}
+	});
+})();
+</script>
+
 		<title>Shadow Sync Proto</title>
 		<style>
 html, body, #canvas {
@@ -92,31 +117,7 @@ body {
 		</style>
 		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
 <link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
-<!-- Shadow Sync: browser-level pointer-lock safety net.
-     Even if the Godot runtime fails to release pointer lock (tab close,
-     game over, focus loss), these page-level listeners force-exit it so the
-     user's mouse cursor is never left invisible in the browser. -->
-<script>
-(function () {
-	function forceExitPointerLock() {
-		try {
-			if (document.pointerLockElement) {
-				document.exitPointerLock();
-			}
-		} catch (e) { /* never break page teardown */ }
-	}
-	// Tab/window close or navigation away
-	window.addEventListener('pagehide', forceExitPointerLock);
-	window.addEventListener('beforeunload', forceExitPointerLock);
-	// Tab hidden (Alt+Tab away, minimize, switch tab)
-	document.addEventListener('visibilitychange', function () {
-		if (document.visibilityState === 'hidden') {
-			forceExitPointerLock();
-		}
-	});
-})();
-</script>
-
+res://head_include.html
 	</head>
 	<body>
 		<canvas id="canvas">
